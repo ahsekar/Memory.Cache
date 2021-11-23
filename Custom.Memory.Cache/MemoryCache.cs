@@ -29,10 +29,14 @@ namespace Custom.Memory.Cache
         /// <param name="cacheItem"></param>
         public void SetItem(string key, string value)
         {
-            if (CacheItems.Count == _maxCapacity)
-                CacheItems.RemoveFirst();
-            RemoveIfExists(key);
-            CacheItems.AddLast(new KeyValuePair<string, string>(key, value));
+            lock (CacheItems)
+            {
+                if (CacheItems.Count == _maxCapacity)
+                    CacheItems.RemoveFirst();
+                RemoveIfExists(key);
+
+                CacheItems.AddLast(new KeyValuePair<string, string>(key, value));
+            }
             _logger.LogInformation($"{key} added to cache successfully.");
         }
 
@@ -42,8 +46,11 @@ namespace Custom.Memory.Cache
         /// <param name="key"></param>
         public void RemoveItem(string key)
         {
-            if (RemoveIfExists(key))
-                _logger.LogInformation($"{key} removed from cache successfully.");
+            lock (CacheItems)
+            {
+                if (RemoveIfExists(key))
+                    _logger.LogInformation($"{key} removed from cache successfully.");
+            }
             _logger.LogInformation($"{key} not present in cache");
         }
 
@@ -52,7 +59,8 @@ namespace Custom.Memory.Cache
         /// </summary>
         public void ClearAll()
         {
-            CacheItems.Clear();
+            lock (CacheItems)
+                CacheItems.Clear();
             _logger.LogInformation($"Cleared all items from the cache");
         }
 
@@ -90,7 +98,7 @@ namespace Custom.Memory.Cache
             {
                 if (item.Key == key)
                 {
-                    CacheItems.Remove(item);
+                    _ = CacheItems.Remove(item);
                     return true;
                 }
             }
