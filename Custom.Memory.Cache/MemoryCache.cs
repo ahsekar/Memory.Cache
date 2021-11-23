@@ -11,6 +11,7 @@ namespace Custom.Memory.Cache
         private readonly ILogger<MemoryCache> _logger;
         /// <summary>
         /// Either from config file in consuming application or using IOptions we can inject
+        /// Also to make thread safe we can add lock or async/await
         /// </summary>
         private readonly int _maxCapacity;
 
