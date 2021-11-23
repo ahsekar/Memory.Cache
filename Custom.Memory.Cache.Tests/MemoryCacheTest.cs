@@ -20,7 +20,7 @@ namespace Custom.Memory.Cache.Tests
         {
             Logger = new();
             Config = new();
-            Config.Setup(x => x.GetSection(It.IsAny<string>()).Value).Returns("10");
+            Config.Setup(x => x.GetSection(It.IsAny<string>()).Value).Returns("2");
             MemoryCache = new(Logger.Object, Config.Object);
         }
 
@@ -54,6 +54,18 @@ namespace Custom.Memory.Cache.Tests
             MemoryCache.SetItem(Key, "updated value");
             var result = MemoryCache.GetItem(Key);
             Assert.Equal("updated value", result.Value);
+        }
+
+        [Fact]
+        public void GivenKeyValueWhenInvokedSetItemAndReachesThreshholdThenFirstItemShouldRemoveFirstFromCache()
+        {
+            MemoryCache.ClearAll();//Setup added if other test case adds/removes items from cache
+
+            MemoryCache.SetItem(Key, Value);
+            MemoryCache.SetItem("SampleKey1", "SampleValue1");
+            MemoryCache.SetItem("SampleKey2", "SampleValue2");
+            var item = MemoryCache.GetItem(Key);
+            Assert.Equal(default, item);
         }
     }
 }
